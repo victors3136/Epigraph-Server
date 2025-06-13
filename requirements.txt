@@ -2,5 +2,6 @@ fastapi
 uvicorn
 boto3
 httpx
-python-multipart
 pydub
+pytest
+python-multipart
