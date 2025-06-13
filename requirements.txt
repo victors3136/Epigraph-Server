@@ -5,3 +5,4 @@ httpx
 pydub
 pytest
 python-multipart
+uvicorn
