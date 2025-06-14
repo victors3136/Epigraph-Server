@@ -4,35 +4,31 @@ from fastapi.responses import PlainTextResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import uuid
 import httpx
-from utils.utils import extract_file_ext, \
-    file_ext_is_valid, \
-    is_audio_duration_longer_than_allowed, \
-    is_consent_given, \
-    store_audio_to_s3, is_gender_valid
+from utils.utils import extract_file_ext, file_ext_is_valid, is_audio_duration_longer_than_allowed, is_consent_given, \
+    store_audio_to_s3, get_wav_bytes_from_m4a
 
 app = FastAPI()
+
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
-
-
 @app.get("/", response_class=HTMLResponse)
 async def index():
     with open('index.html', 'r') as home_page_file:
         return HTMLResponse(content=home_page_file.read())
 
-
 @app.post("/transcribe/")
 async def receive_audio(
-        file: UploadFile,
-        age: str = Form(...),
-        gender: str = Form(...),
-        consent: str = Form(...)
+    file: UploadFile,
+    age: str = Form(...),
+    gender: str = Form(...),
+    consent: str = Form(...)
 ) -> PlainTextResponse:
+
     file_ext = extract_file_ext(file)
 
     if not file_ext_is_valid(file_ext, allowed_extensions):
         return PlainTextResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
-            content="Only .wav files are allowed.",
+            content="Only .m4a files are allowed.",
         )
 
     unique_filename = f"{uuid.uuid4()}{file_ext}"
@@ -51,21 +47,21 @@ async def receive_audio(
             content=f"Invalid audio file: {str(e)}"
         )
 
-    if is_consent_given(consent) and is_gender_valid(gender):
+    if is_consent_given(consent):
+        gender = gender.lower()
+        if gender not in ["man", "woman", "other"]:
+            gender = None
         store_audio_to_s3(unique_filename, contents, file.content_type, {
-            "age": age.lower(),
-            "gender": gender.lower()
-        })
+                "age": age.lower(),
+                "gender": gender
+            })
 
+    wav_bytes = get_wav_bytes_from_m4a(contents)
+    print("====WAV BYTES====")
+    print(wav_bytes)
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(
-                inference_endpoint,
-                content=contents,
-                headers=headers
-            )
-            print(f"====RESPONSE====\n{response}")
-            response.raise_for_status()
+            response = await client.post(inference_endpoint, content=wav_bytes, headers=headers)
     except httpx.HTTPStatusError as e:
         print(f"HTTP ERROR {str(e)}")
         return PlainTextResponse(
