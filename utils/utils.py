@@ -41,3 +41,9 @@ def store_audio_to_s3(
         ContentType=content_type,
         Metadata={key.lower(): str(value).lower() for key, value in metadata.items()}
     )
+
+def get_wav_bytes_from_m4a(contents: bytes) -> bytes:
+    audio = AudioSegment.from_file(BytesIO(contents), format="m4a")
+    buf = BytesIO()
+    audio.export(buf, format="wav")
+    return buf.getvalue()

@@ -4,7 +4,9 @@ from fastapi.responses import PlainTextResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import uuid
 import httpx
-from utils.utils import extract_file_ext, file_ext_is_valid, is_audio_duration_longer_than_allowed, is_consent_given, store_audio_to_s3
+from utils.utils import extract_file_ext, file_ext_is_valid, is_audio_duration_longer_than_allowed, is_consent_given, \
+    store_audio_to_s3, get_wav_bytes_from_m4a
+
 app = FastAPI()
 
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
@@ -56,8 +58,8 @@ async def receive_audio(
 
     try:
         async with httpx.AsyncClient() as client:
-            headers["Content-Type"] = file.content_type
-            response = await client.post(inference_endpoint, content=contents, headers=headers)
+            wav_bytes = get_wav_bytes_from_m4a(contents)
+            response = await client.post(inference_endpoint, content=wav_bytes, headers=headers)
             transcription = response.text
     except httpx.HTTPStatusError as e:
         return PlainTextResponse(

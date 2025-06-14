@@ -13,4 +13,5 @@ s3_client = boto3.client("s3",
 headers = {
 	"Accept" : "application/json",
 	"Authorization": f"Bearer {os.getenv('HF_TOKEN')}",
+	"Content-Type" : "audio/wav"
 }
