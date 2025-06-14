@@ -1,7 +1,8 @@
 import boto3
 import os
 
-allowed_extensions = [".m4a"]
+allowed_extensions = {".wav"}
+allowed_genders = {"woman", "man", "other"}
 bucket_name = os.getenv('BUCKET_NAME')
 inference_endpoint = os.getenv('INFERENCE_ENDPOINT')
 max_duration_s = 30

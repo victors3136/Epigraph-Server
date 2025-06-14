@@ -1,13 +1,12 @@
 from fastapi import UploadFile
 import os
 import pytest
-from utils.utils import get_wav_bytes_from_m4a
 from utils.utils import (
     extract_file_ext,
     file_ext_is_valid,
     get_audio_duration,
     is_audio_duration_longer_than_allowed,
-    is_consent_given,
+    is_consent_given, is_gender_valid,
 )
 
 
@@ -15,13 +14,14 @@ def get_bytes(path: str):
     base_dir = os.path.dirname(__file__)
     full_path = os.path.join(base_dir, "assets", path)
     with open(full_path, "rb") as f:
-            return f.read()
+        return f.read()
+
 
 def test_extract_file_ext():
-
     class DummyFile(UploadFile):
         def __init__(self):
             pass
+
         filename = "example.m4a"
 
     ext = extract_file_ext(DummyFile())
@@ -59,6 +59,14 @@ def test_is_audio_duration_longer_than_allowed():
 def test_is_consent_given(consent_str, expected):
     assert is_consent_given(consent_str) == expected
 
-def test_m4a_2_wav_does_not_crash():
-    get_wav_bytes_from_m4a(get_bytes("test_5s_audio.m4a"))
-
+@pytest.mark.parametrize("gender, expected", [
+    ("woman", True),
+    ("man", True),
+    (" WOMAN      ", True),
+    ("other", True),
+    ("men", False),
+    ("abcdef", False),
+    ("", False),
+])
+def test_is_consent_given(gender, expected):
+    assert is_gender_valid(gender) == expected
