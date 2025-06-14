@@ -58,7 +58,6 @@ async def receive_audio(
         async with httpx.AsyncClient() as client:
             files = {'file': (unique_filename, contents, file.content_type)}
             response = await client.post(inference_endpoint, files=files, headers=headers)
-            response.raise_for_status()
             transcription = response.text
     except httpx.HTTPStatusError as e:
         return PlainTextResponse(

@@ -10,5 +10,4 @@ s3_client = boto3.client("s3", region_name=region_name)
 headers = {
 	"Accept" : "application/json",
 	"Authorization": f"Bearer {os.getenv('HF_TOKEN')}",
-	"Content-Type": "application/json"
 }
