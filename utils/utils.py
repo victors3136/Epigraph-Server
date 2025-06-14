@@ -28,6 +28,9 @@ def is_consent_given(consent: str) -> bool:
     return consent.strip().lower() == "true"
 
 
+def is_gender_valid(gender: str) -> bool:
+    return gender.strip().lower() in valid_genders
+
 def store_audio_to_s3(
     filename: str,
     contents: bytes,
