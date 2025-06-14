@@ -56,12 +56,14 @@ async def receive_audio(
                 "gender": gender
             })
 
+    wav_bytes = get_wav_bytes_from_m4a(contents)
+    print("====WAV BYTES====")
+    print(wav_bytes)
     try:
         async with httpx.AsyncClient() as client:
-            wav_bytes = get_wav_bytes_from_m4a(contents)
             response = await client.post(inference_endpoint, content=wav_bytes, headers=headers)
-            transcription = response.text
     except httpx.HTTPStatusError as e:
+        print(f"HTTP ERROR {str(e)}")
         return PlainTextResponse(
             status_code=e.response.status_code,
             content=f"Transcriber responded with error: {e.response.text}",
@@ -72,4 +74,4 @@ async def receive_audio(
             content=f"Transcription failed: {str(e)}",
         )
 
-    return PlainTextResponse(status_code=status.HTTP_200_OK, content=transcription)
+    return PlainTextResponse(status_code=status.HTTP_200_OK, content=response.text)
