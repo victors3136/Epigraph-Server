@@ -10,56 +10,10 @@ app = FastAPI()
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 @app.get("/", response_class=HTMLResponse)
 async def index():
-    html_content = """
-                   <!DOCTYPE html>
-                   <html lang="en">
-                   <head>
-                       <meta charset="UTF-8">
-                       <title>Welcome to Epigraph Server</title>
-                       <style>
-                           body {
-                               font-family: Arial, sans-serif;
-                               background-color: #3a3e40;
-                               margin: 0;
-                               padding: 0;
-                               display: flex;
-                               justify-content: center;
-                               align-items: center;
-                               width: auto;
-                           }
+    with open('index.html', 'r') as home_page_file:
+        return HTMLResponse(content=home_page_file.read())
 
-                           .container {
-                               text-align: center;
-                               background: #232933;
-                               margin-top: 10px;
-                               border-radius: 12px;
-                               box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-                           }
-
-                           img {
-                               max-width: 60%;
-                               height: auto;
-                               border-radius: 8px;
-                               margin-top: 20px;
-                           }
-
-                           h1 {
-                               color: #d6d6d6;
-                               font-size: 2em;
-                           }
-                       </style>
-                   </head>
-                   <body>
-                   <div class="container">
-                       <img src="/assets/index-photo.png" alt="Welcome Image">
-                       <h1>Welcome to Epigraph Server!</h1>
-                   </div>
-                   </body>
-                   </html> \
-                   """
-    return HTMLResponse(content=html_content)
-
-@app.post("/upload-audio/")
+@app.post("/transcribe/")
 async def receive_audio(
     file: UploadFile,
     age: str = Form(...),
