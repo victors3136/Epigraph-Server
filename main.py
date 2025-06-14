@@ -1,4 +1,4 @@
-from constants import allowed_extensions, inference_endpoint
+from constants import allowed_extensions, inference_endpoint, headers
 from fastapi import FastAPI, UploadFile, Form, status
 from fastapi.responses import PlainTextResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -57,7 +57,7 @@ async def receive_audio(
     try:
         async with httpx.AsyncClient() as client:
             files = {'file': (unique_filename, contents, file.content_type)}
-            response = await client.post(inference_endpoint, files=files)
+            response = await client.post(inference_endpoint, files=files, headers=headers)
             response.raise_for_status()
             transcription = response.text
     except httpx.HTTPStatusError as e:
