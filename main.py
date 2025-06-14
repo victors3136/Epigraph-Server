@@ -46,9 +46,12 @@ async def receive_audio(
         )
 
     if is_consent_given(consent):
+        gender = gender.lower()
+        if gender not in ["man", "woman", "other"]:
+            gender = None
         store_audio_to_s3(unique_filename, contents, file.content_type, {
                 "age": age.lower(),
-                "gender": gender.lower()
+                "gender": gender
             })
 
     try:

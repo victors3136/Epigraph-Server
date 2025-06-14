@@ -128,8 +128,8 @@
 interface TranscriptionRequest {
   file: UploadFile; // .m4a format, max 30 seconds
   age: string?
-  gender: string?
-  consent: string?
+  gender: "man" | "woman" | "other";
+  consent: "true" | "false";
 }
 </pre>
 
